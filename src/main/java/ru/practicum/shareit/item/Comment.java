@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String text;
+    private Long id;
+    private String text;
     @ManyToOne(fetch = FetchType.LAZY)
-    Item item;
+    private Item item;
     @ManyToOne(fetch = FetchType.LAZY)
-    User author;
-    LocalDateTime created;
+    private User author;
+    private LocalDateTime created;
 }

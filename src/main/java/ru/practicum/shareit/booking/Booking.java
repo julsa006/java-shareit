@@ -17,15 +17,15 @@ import java.time.LocalDateTime;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(name = "start_time")
-    LocalDateTime startTime;
+    private LocalDateTime startTime;
     @Column(name = "end_time")
-    LocalDateTime endTime;
+    private LocalDateTime endTime;
     @ManyToOne(fetch = FetchType.LAZY)
-    Item item;
+    private Item item;
     @ManyToOne(fetch = FetchType.LAZY)
-    User booker;
+    private User booker;
     @Enumerated(EnumType.STRING)
-    BookingStatus status;
+    private BookingStatus status;
 }

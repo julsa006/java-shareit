@@ -10,9 +10,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class FullItemDto extends ItemDto {
-    BookingLiteDto lastBooking;
-    BookingLiteDto nextBooking;
-    List<CommentDto> comments;
+    private BookingLiteDto lastBooking;
+    private BookingLiteDto nextBooking;
+    private List<CommentDto> comments;
 
     public FullItemDto(Item item, BookingLiteDto lastBooking, BookingLiteDto nextBooking, List<CommentDto> comments) {
         super(item.getId(), item.getName(), item.getDescription(), item.isAvailable(), item.getOwner().getId());

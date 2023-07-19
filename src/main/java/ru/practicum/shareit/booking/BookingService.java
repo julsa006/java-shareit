@@ -9,9 +9,9 @@ public interface BookingService {
 
     Booking approve(Long bookingId, boolean approved, Long userId);
 
-    List<Booking> getUserBookings(State state, Long userId);
+    List<Booking> getUserBookings(String stringState, Long userId);
 
-    List<Booking> getOwnerBookings(State state, Long ownerId);
+    List<Booking> getOwnerBookings(String stringState, Long ownerId);
 
     Booking get(Long bookingId, Long userId);
 }

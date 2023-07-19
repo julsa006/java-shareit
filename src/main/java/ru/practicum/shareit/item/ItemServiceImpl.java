@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.CommentWithoutBookingException;
@@ -66,21 +67,29 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<FullItem> getUserItems(Long userId) {
-        List<FullItem> items = itemRepository.findAllByOwnerIdOrderById(userId).stream()
-                .map(item -> new FullItem(item,
-                        bookingRepository.findLastBooking(item.getId()),
-                        bookingRepository.findNextBooking(item.getId()), null))
-                .collect(Collectors.toList());
+        List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId);
         Map<Long, FullItem> itemsMap = new HashMap<>();
-        for (FullItem item : items) {
-            itemsMap.put(item.getItem().getId(), item);
+        for (Item item : items) {
+            itemsMap.put(item.getId(), new FullItem(item, null, null, null));
         }
-        List<Comment> comments = commentRepository.findByItemIdIn(items.stream().map(i -> i.getItem().getId())
-                .collect(Collectors.toList()));
+        List<Long> itemIds = items.stream().map(Item::getId)
+                .collect(Collectors.toList());
+
+        List<Booking> lastBookings = bookingRepository.findLastBookings(itemIds);
+        for (Booking booking : lastBookings) {
+            itemsMap.get(booking.getItem().getId()).setLastBooking(booking);
+        }
+
+        List<Booking> nextBookings = bookingRepository.findNextBookings(itemIds);
+        for (Booking booking : nextBookings) {
+            itemsMap.get(booking.getItem().getId()).setNextBooking(booking);
+        }
+
+        List<Comment> comments = commentRepository.findByItemIdIn(itemIds);
         for (Comment comment : comments) {
             itemsMap.get(comment.getAuthor().getId()).getComments().add(comment);
         }
-        return items;
+        return new ArrayList<>(itemsMap.values());
     }
 
     @Override

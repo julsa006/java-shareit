@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class FullItem {
-    Item item;
-    Booking lastBooking;
-    Booking nextBooking;
-    List<Comment> comments;
+    private Item item;
+    private Booking lastBooking;
+    private Booking nextBooking;
+    private List<Comment> comments;
 }

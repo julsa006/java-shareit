@@ -75,6 +75,30 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "limit 1", nativeQuery = true)
     Booking findLastBooking(Long itemId);
 
+    @Query(value = "select b1.* from bookings as b1 " +
+            "join (select b2.item_id as item_id, max(b2.start_time) as max_time " +
+            "from bookings as b2 " +
+            "where b2.item_id in ?1 " +
+            "and b2.status = 'APPROVED' " +
+            "and b2.start_time < now() " +
+            "group by b2.item_id) as b3 " +
+            "on b1.item_id = b3.item_id " +
+            "and b1.start_time = b3.max_time " +
+            "where b1.status = 'APPROVED' ", nativeQuery = true)
+    List<Booking> findLastBookings(List<Long> itemIds);
+
+    @Query(value = "select b1.* from bookings as b1 " +
+            "join (select b2.item_id as item_id, min(b2.start_time) as min_time " +
+            "from bookings as b2 " +
+            "where b2.item_id in ?1 " +
+            "and b2.status = 'APPROVED' " +
+            "and b2.start_time > now() " +
+            "group by b2.item_id) as b3 " +
+            "on b1.item_id = b3.item_id " +
+            "and b1.start_time = b3.min_time " +
+            "where b1.status = 'APPROVED' ", nativeQuery = true)
+    List<Booking> findNextBookings(List<Long> itemIds);
+
     @Query(value = "select * from bookings as b " +
             "where b.item_id = ?1 " +
             "and b.status = 'APPROVED' " +

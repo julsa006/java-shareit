@@ -15,11 +15,11 @@ import javax.persistence.*;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String name;
-    String description;
-    boolean available;
+    private Long id;
+    private String name;
+    private String description;
+    private boolean available;
     @ManyToOne(fetch = FetchType.LAZY)
-    User owner;
+    private User owner;
 
 }
