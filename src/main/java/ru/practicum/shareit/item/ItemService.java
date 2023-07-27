@@ -7,9 +7,11 @@ public interface ItemService {
 
     Item update(Long id, String name, String description, Boolean available, Long updaterId);
 
-    Item get(Long id);
+    FullItem get(Long id, Long userId);
 
-    List<Item> getUserItems(Long userId);
+    List<FullItem> getUserItems(Long userId);
 
     List<Item> searchItems(String text);
+
+    Comment createComment(String text, Long itemId, Long userId);
 }

@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemDto {
-    private Long id;
-    private String name;
-    private String description;
-    private boolean available;
-    private Long owner;
+public class CreateCommentDto {
+    @NotBlank
+    private String text;
 }

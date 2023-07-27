@@ -6,20 +6,21 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "items")
-public class Item {
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String description;
-    private boolean available;
+    private String text;
     @ManyToOne(fetch = FetchType.LAZY)
-    private User owner;
-
+    private Item item;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User author;
+    private LocalDateTime created;
 }
