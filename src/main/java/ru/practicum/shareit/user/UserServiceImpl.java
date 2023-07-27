@@ -3,7 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.EntityNotFoundException;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long id, String name, String email) {
         User user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("User %d not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User %d not found", id)));
         if (name != null) {
             user.setName(name);
         }
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User get(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("User %d not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User %d not found", id)));
     }
 
     @Override

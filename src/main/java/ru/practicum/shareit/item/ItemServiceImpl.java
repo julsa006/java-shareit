@@ -7,7 +7,7 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.CommentWithoutBookingException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -30,14 +30,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item create(String name, String description, boolean available, Long ownerId) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException(String.format("User %s not found", ownerId)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User %s not found", ownerId)));
         return itemRepository.save(new Item(null, name, description, available, owner));
     }
 
     @Override
     public Item update(Long id, String name, String description, Boolean available, Long updaterId) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Item %s not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Item %s not found", id)));
         if (!item.getOwner().getId().equals(updaterId)) {
             throw new AccessDeniedException(String.format("User %d has no item %d", updaterId, id));
         }
@@ -56,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public FullItem get(Long id, Long userId) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Item %d not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Item %d not found", id)));
         FullItem ownersItem = new FullItem(item, null, null, commentRepository.findByItemId(id));
         if (item.getOwner().getId().equals(userId)) {
             ownersItem.setLastBooking(bookingRepository.findLastBooking(id));
@@ -103,9 +103,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Comment createComment(String text, Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException(String.format("Item %s not found", itemId)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Item %s not found", itemId)));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("User %s not found", userId)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("User %s not found", userId)));
         if (bookingRepository.countItemUserBookings(itemId, userId) == 0) {
             throw new CommentWithoutBookingException(String.format("User %d cannot comment item %d", userId, itemId));
         }

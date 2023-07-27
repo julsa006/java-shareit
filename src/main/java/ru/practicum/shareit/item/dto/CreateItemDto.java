@@ -1,11 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Value;
+import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Value
+@Data
 public class CreateItemDto {
     @NotNull
     @NotBlank
