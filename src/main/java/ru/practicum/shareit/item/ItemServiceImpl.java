@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -8,12 +9,14 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.CommentWithoutBookingException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,12 +29,18 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
-    public Item create(String name, String description, boolean available, Long ownerId) {
+    public Item create(String name, String description, boolean available, Long requestId, Long ownerId) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("User %s not found", ownerId)));
-        return itemRepository.save(new Item(null, name, description, available, owner));
+        ItemRequest request = null;
+        if (requestId != null) {
+            request = itemRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new EntityNotFoundException(String.format("Request %s not found", requestId)));
+        }
+        return itemRepository.save(new Item(null, name, description, available, owner, request));
     }
 
     @Override
@@ -66,9 +75,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<FullItem> getUserItems(Long userId) {
-        List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId);
-        Map<Long, FullItem> itemsMap = new HashMap<>();
+    public List<FullItem> getUserItems(Long userId, int from, int size) {
+        PageRequest page = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId, page);
+        Map<Long, FullItem> itemsMap = new LinkedHashMap<>();
         for (Item item : items) {
             itemsMap.put(item.getId(), new FullItem(item, null, null, null));
         }
@@ -93,11 +103,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> searchItems(String text) {
+    public List<Item> searchItems(String text, int from, int size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.findAllByText(text);
+        PageRequest page = PageRequest.of(from / size, size);
+        return itemRepository.findAllByTextOrderById(text, page);
     }
 
     @Override

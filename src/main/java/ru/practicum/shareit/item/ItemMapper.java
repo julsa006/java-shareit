@@ -4,8 +4,11 @@ import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.FullItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForRequestsDto;
+import ru.practicum.shareit.request.ItemRequest;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ItemMapper {
@@ -15,7 +18,18 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.isAvailable(),
-                item.getId()
+                item.getId(),
+                Optional.ofNullable(item.getRequest()).map(ItemRequest::getId).orElse(null)
+        );
+    }
+
+    public static ItemForRequestsDto toItemForRequestsDto(Item item) {
+        return new ItemForRequestsDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.isAvailable(),
+                item.getRequest().getId()
         );
     }
 

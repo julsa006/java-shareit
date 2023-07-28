@@ -14,4 +14,5 @@ public class CreateItemDto {
     String description;
     @NotNull
     Boolean available;
+    Long requestId;
 }

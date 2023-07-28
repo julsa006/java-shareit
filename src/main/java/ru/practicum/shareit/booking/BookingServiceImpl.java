@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
@@ -60,48 +61,50 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getUserBookings(String stringState, Long userId) {
+    public List<Booking> getUserBookings(String stringState, Long userId, int from, int size) {
         State state = getState(stringState);
         if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException(String.format("User %d not found", userId));
         }
+        PageRequest page = PageRequest.of(from / size, size);
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByBookerIdOrderByStartTimeDesc(userId);
+                return bookingRepository.findAllByBookerIdOrderByStartTimeDesc(userId, page);
             case CURRENT:
-                return bookingRepository.findUsersCurrent(userId);
+                return bookingRepository.findUsersCurrent(userId, page);
             case PAST:
-                return bookingRepository.findUsersPast(userId);
+                return bookingRepository.findUsersPast(userId, page);
             case FUTURE:
-                return bookingRepository.findUsersFuture(userId);
+                return bookingRepository.findUsersFuture(userId, page);
             case WAITING:
-                return bookingRepository.findUsersByStatus(userId, BookingStatus.WAITING);
+                return bookingRepository.findUsersByStatus(userId, BookingStatus.WAITING, page);
             case REJECTED:
-                return bookingRepository.findUsersByStatus(userId, BookingStatus.REJECTED);
+                return bookingRepository.findUsersByStatus(userId, BookingStatus.REJECTED, page);
             default:
                 throw new UnsupportedOperationException(String.format("Unknown state: %s", state));
         }
     }
 
     @Override
-    public List<Booking> getOwnerBookings(String stringState, Long ownerId) {
+    public List<Booking> getOwnerBookings(String stringState, Long ownerId, int from, int size) {
         State state = getState(stringState);
         if (!userRepository.existsById(ownerId)) {
             throw new EntityNotFoundException(String.format("User %d not found", ownerId));
         }
+        PageRequest page = PageRequest.of(from / size, size);
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(ownerId);
+                return bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(ownerId, page);
             case CURRENT:
-                return bookingRepository.findOwnersCurrent(ownerId);
+                return bookingRepository.findOwnersCurrent(ownerId, page);
             case PAST:
-                return bookingRepository.findOwnersPast(ownerId);
+                return bookingRepository.findOwnersPast(ownerId, page);
             case FUTURE:
-                return bookingRepository.findOwnersFuture(ownerId);
+                return bookingRepository.findOwnersFuture(ownerId, page);
             case WAITING:
-                return bookingRepository.findOwnersByStatus(ownerId, BookingStatus.WAITING);
+                return bookingRepository.findOwnersByStatus(ownerId, BookingStatus.WAITING, page);
             case REJECTED:
-                return bookingRepository.findOwnersByStatus(ownerId, BookingStatus.REJECTED);
+                return bookingRepository.findOwnersByStatus(ownerId, BookingStatus.REJECTED, page);
             default:
                 throw new UnsupportedOperationException(String.format("Unknown state: %s", state));
         }
