@@ -80,7 +80,7 @@ public class ItemServiceImpl implements ItemService {
         List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId, page);
         Map<Long, FullItem> itemsMap = new LinkedHashMap<>();
         for (Item item : items) {
-            itemsMap.put(item.getId(), new FullItem(item, null, null, null));
+            itemsMap.put(item.getId(), new FullItem(item, null, null, new ArrayList<>()));
         }
         List<Long> itemIds = items.stream().map(Item::getId)
                 .collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class ItemServiceImpl implements ItemService {
 
         List<Comment> comments = commentRepository.findByItemIdIn(itemIds);
         for (Comment comment : comments) {
-            itemsMap.get(comment.getAuthor().getId()).getComments().add(comment);
+            itemsMap.get(comment.getItem().getId()).getComments().add(comment);
         }
         return new ArrayList<>(itemsMap.values());
     }

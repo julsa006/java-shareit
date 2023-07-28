@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.exception.DatesInconsistencyException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.UnavailableItemException;
@@ -26,19 +25,19 @@ public class BookingServiceImpl implements BookingService {
     ItemRepository itemRepository;
 
     @Override
-    public Booking create(CreateBookingDto booking, Long userId) {
-        validateDates(booking.getStart(), booking.getEnd());
+    public Booking create(Long itemId, LocalDateTime start, LocalDateTime end, Long userId) {
+        validateDates(start, end);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("User %d not found", userId)));
-        Item item = itemRepository.findById(booking.getItemId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Item %d not found", booking.getItemId())));
-        if (userId.equals(item.getId())) {
-            throw new EntityNotFoundException(String.format("Item %d not found", booking.getItemId()));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Item %d not found", itemId)));
+        if (userId.equals(item.getOwner().getId())) {
+            throw new EntityNotFoundException(String.format("Item %d not found", itemId));
         }
         if (!item.isAvailable()) {
             throw new UnavailableItemException(String.format("Item %d unavailable", item.getId()));
         }
-        return bookingRepository.save(new Booking(null, booking.getStart(), booking.getEnd(), item,
+        return bookingRepository.save(new Booking(null, start, end, item,
                 user, BookingStatus.WAITING));
     }
 
@@ -67,19 +66,20 @@ public class BookingServiceImpl implements BookingService {
             throw new EntityNotFoundException(String.format("User %d not found", userId));
         }
         PageRequest page = PageRequest.of(from / size, size);
+        LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case ALL:
                 return bookingRepository.findAllByBookerIdOrderByStartTimeDesc(userId, page);
             case CURRENT:
-                return bookingRepository.findUsersCurrent(userId, page);
+                return bookingRepository.findAllByBookerIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(userId, now, now, page);
             case PAST:
-                return bookingRepository.findUsersPast(userId, page);
+                return bookingRepository.findAllByBookerIdAndEndTimeBeforeOrderByStartTimeDesc(userId, now, page);
             case FUTURE:
-                return bookingRepository.findUsersFuture(userId, page);
+                return bookingRepository.findAllByBookerIdAndStartTimeAfterOrderByStartTimeDesc(userId, now, page);
             case WAITING:
-                return bookingRepository.findUsersByStatus(userId, BookingStatus.WAITING, page);
+                return bookingRepository.findAllByBookerIdAndStatusOrderByStartTimeDesc(userId, BookingStatus.WAITING, page);
             case REJECTED:
-                return bookingRepository.findUsersByStatus(userId, BookingStatus.REJECTED, page);
+                return bookingRepository.findAllByBookerIdAndStatusOrderByStartTimeDesc(userId, BookingStatus.REJECTED, page);
             default:
                 throw new UnsupportedOperationException(String.format("Unknown state: %s", state));
         }
@@ -92,19 +92,20 @@ public class BookingServiceImpl implements BookingService {
             throw new EntityNotFoundException(String.format("User %d not found", ownerId));
         }
         PageRequest page = PageRequest.of(from / size, size);
+        LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case ALL:
                 return bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(ownerId, page);
             case CURRENT:
-                return bookingRepository.findOwnersCurrent(ownerId, page);
+                return bookingRepository.findAllByItemOwnerIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(ownerId, now, now, page);
             case PAST:
-                return bookingRepository.findOwnersPast(ownerId, page);
+                return bookingRepository.findAllByItemOwnerIdAndEndTimeBeforeOrderByStartTimeDesc(ownerId, now, page);
             case FUTURE:
-                return bookingRepository.findOwnersFuture(ownerId, page);
+                return bookingRepository.findAllByItemOwnerIdAndStartTimeAfterOrderByStartTimeDesc(ownerId, now, page);
             case WAITING:
-                return bookingRepository.findOwnersByStatus(ownerId, BookingStatus.WAITING, page);
+                return bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartTimeDesc(ownerId, BookingStatus.WAITING, page);
             case REJECTED:
-                return bookingRepository.findOwnersByStatus(ownerId, BookingStatus.REJECTED, page);
+                return bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartTimeDesc(ownerId, BookingStatus.REJECTED, page);
             default:
                 throw new UnsupportedOperationException(String.format("Unknown state: %s", state));
         }
@@ -123,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-    private State getState(String stringState) {
+    protected State getState(String stringState) {
         State state;
         try {
             state = State.valueOf(stringState);
@@ -133,10 +134,7 @@ public class BookingServiceImpl implements BookingService {
         return state;
     }
 
-    private void validateDates(LocalDateTime start, LocalDateTime end) {
-        if (LocalDateTime.now().isAfter(end)) {
-            throw new DatesInconsistencyException("End date cannot be in the past");
-        }
+    protected void validateDates(LocalDateTime start, LocalDateTime end) {
         if (LocalDateTime.now().isAfter(start)) {
             throw new DatesInconsistencyException("Start date cannot be in the past");
         }

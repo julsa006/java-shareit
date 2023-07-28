@@ -42,7 +42,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return getItemRequestWithItems(requests);
     }
 
-    private List<ItemRequestWithItems> getItemRequestWithItems(List<ItemRequest> requests) {
+    protected List<ItemRequestWithItems> getItemRequestWithItems(List<ItemRequest> requests) {
         List<Item> items = itemRepository.findAllByRequestIdIn(requests.stream()
                 .map(ItemRequest::getId).collect(Collectors.toList()));
 

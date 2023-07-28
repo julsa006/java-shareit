@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -12,61 +13,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByItemOwnerIdOrderByStartTimeDesc(Long ownerId, Pageable page);
 
-    @Query("select b from Booking as b " +
-            "where b.booker.id = ?1 " +
-            "and b.status = ?2 " +
-            "order by b.startTime desc")
-    List<Booking> findUsersByStatus(Long bookerId, BookingStatus status, Pageable page);
+    List<Booking> findAllByBookerIdAndStatusOrderByStartTimeDesc(Long bookerId, BookingStatus status, Pageable page);
 
-    @Query("select b from Booking as b " +
-            "where b.booker.id = ?1 " +
-            "and b.startTime > now() " +
-            "order by b.startTime desc")
-    List<Booking> findUsersFuture(Long bookerId, Pageable page);
+    List<Booking> findAllByItemOwnerIdAndStatusOrderByStartTimeDesc(Long bookerId, BookingStatus status, Pageable page);
 
-    @Query("select b from Booking as b " +
-            "where b.booker.id = ?1 " +
-            "and b.startTime < now() " +
-            "and b.endTime > now() " +
-            "order by b.startTime desc")
-    List<Booking> findUsersCurrent(Long bookerId, Pageable page);
+    List<Booking> findAllByBookerIdAndStartTimeAfterOrderByStartTimeDesc(Long bookerId, LocalDateTime startTime, Pageable page);
 
-    @Query("select b from Booking as b " +
-            "where b.booker.id = ?1 " +
-            "and b.endTime < now() " +
-            "order by b.startTime desc")
-    List<Booking> findUsersPast(Long bookerId, Pageable page);
+    List<Booking> findAllByBookerIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(Long bookerId, LocalDateTime startTime, LocalDateTime endTime, Pageable page);
 
+    List<Booking> findAllByBookerIdAndEndTimeBeforeOrderByStartTimeDesc(Long bookerId, LocalDateTime startTime, Pageable page);
 
-    @Query("select b from Booking as b " +
-            "join b.item as i " +
-            "where i.owner.id = ?1 " +
-            "and b.status = ?2 " +
-            "order by b.startTime desc")
-    List<Booking> findOwnersByStatus(Long bookerId, BookingStatus status, Pageable page);
+    List<Booking> findAllByItemOwnerIdAndStartTimeAfterOrderByStartTimeDesc(Long ownerId, LocalDateTime startTime, Pageable page);
 
+    List<Booking> findAllByItemOwnerIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(Long bookerId, LocalDateTime startTime, LocalDateTime endTime, Pageable page);
 
-    @Query("select b from Booking as b " +
-            "join b.item as i " +
-            "where i.owner.id = ?1 " +
-            "and b.startTime > now() " +
-            "order by b.startTime desc")
-    List<Booking> findOwnersFuture(Long bookerId, Pageable page);
-
-    @Query("select b from Booking as b " +
-            "join b.item as i " +
-            "where i.owner.id = ?1 " +
-            "and b.startTime < now() " +
-            "and b.endTime > now() " +
-            "order by b.startTime desc")
-    List<Booking> findOwnersCurrent(Long bookerId, Pageable page);
-
-    @Query("select b from Booking as b " +
-            "join b.item as i " +
-            "where i.owner.id = ?1 " +
-            "and b.endTime < now() " +
-            "order by b.startTime desc")
-    List<Booking> findOwnersPast(Long bookerId, Pageable page);
+    List<Booking> findAllByItemOwnerIdAndEndTimeBeforeOrderByStartTimeDesc(Long bookerId, LocalDateTime endTime, Pageable page);
 
     @Query(value = "select * from bookings as b " +
             "where b.item_id = ?1 " +
