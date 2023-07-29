@@ -13,5 +13,5 @@ import javax.validation.constraints.NotNull;
 public class CreateItemRequestDto {
     @NotNull
     @NotBlank
-    String description;
+    private String description;
 }

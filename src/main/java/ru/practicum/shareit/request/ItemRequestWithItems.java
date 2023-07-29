@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ItemRequestWithItems {
-    ItemRequest itemRequest;
-    List<Item> items;
+    private ItemRequest itemRequest;
+    private List<Item> items;
 }

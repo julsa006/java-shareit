@@ -13,10 +13,10 @@ import javax.validation.constraints.NotNull;
 public class CreateItemDto {
     @NotNull
     @NotBlank
-    String name;
+    private String name;
     @NotNull
-    String description;
+    private String description;
     @NotNull
-    Boolean available;
-    Long requestId;
+    private Boolean available;
+    private Long requestId;
 }
