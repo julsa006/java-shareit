@@ -4,19 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateItemDto {
-    @NotNull
-    @NotBlank
+public class ItemForRequestsDto {
+    private Long id;
     private String name;
-    @NotNull
     private String description;
-    @NotNull
-    private Boolean available;
+    private boolean available;
     private Long requestId;
 }
