@@ -3,12 +3,9 @@ package ru.practicum.shareit.booking;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import ru.practicum.shareit.exception.DatesInconsistencyException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.UnsupportedOperationException;
 import ru.practicum.shareit.utils.DBMockTest;
-
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,32 +15,6 @@ import static org.mockito.Mockito.when;
 class BookingServiceImplTest extends DBMockTest {
     @Autowired
     BookingServiceImpl bookingService;
-
-    @Test
-    void validateDatesCantBeInPast() {
-        LocalDateTime startPast = LocalDateTime.now().minusDays(2);
-        LocalDateTime endPast = LocalDateTime.now().minusDays(1);
-        LocalDateTime endFuture = LocalDateTime.now().plusDays(2);
-
-        assertThrows(DatesInconsistencyException.class, () -> bookingService.validateDates(startPast, endFuture));
-        assertThrows(DatesInconsistencyException.class, () -> bookingService.validateDates(startPast, endPast));
-    }
-
-    @Test
-    void validateDatesStartShouldBeBeforeEnd() {
-        LocalDateTime start = LocalDateTime.now().plusDays(1);
-
-        assertThrows(DatesInconsistencyException.class, () -> bookingService.validateDates(start, start.minusDays(1)));
-        assertThrows(DatesInconsistencyException.class, () -> bookingService.validateDates(start, start));
-    }
-
-    @Test
-    void validateDatesPositive() {
-        LocalDateTime start = LocalDateTime.now().plusDays(1);
-        LocalDateTime end = LocalDateTime.now().plusDays(2);
-
-        assertDoesNotThrow(() -> bookingService.validateDates(start, end));
-    }
 
     @Test
     void testGetUserBookings() {

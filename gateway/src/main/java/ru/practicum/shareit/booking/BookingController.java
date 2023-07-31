@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.dto.BookingState;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -32,6 +33,7 @@ public class BookingController {
 	@PostMapping
 	public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
 			@RequestBody @Valid BookItemRequestDto requestDto) {
+		validateDates(requestDto.getStart(), requestDto.getEnd());
 		return client.bookItem(userId, requestDto);
 	}
 
@@ -57,5 +59,12 @@ public class BookingController {
 		return client.getOwnerBookings(ownerId, state, from, size);
 	}
 
-
+	protected void validateDates(LocalDateTime start, LocalDateTime end) {
+		if (LocalDateTime.now().isAfter(start)) {
+			throw new IllegalArgumentException("Start date cannot be in the past");
+		}
+		if (!start.isBefore(end)) {
+			throw new IllegalArgumentException("Start date must be before end date");
+		}
+	}
 }

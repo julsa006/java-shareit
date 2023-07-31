@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.DatesInconsistencyException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.UnavailableItemException;
 import ru.practicum.shareit.exception.UnsupportedOperationException;
@@ -26,7 +25,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking create(Long itemId, LocalDateTime start, LocalDateTime end, Long userId) {
-        validateDates(start, end);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("User %d not found", userId)));
         Item item = itemRepository.findById(itemId)
@@ -132,14 +130,5 @@ public class BookingServiceImpl implements BookingService {
             throw new UnsupportedOperationException(String.format("Unknown state: %s", stringState));
         }
         return state;
-    }
-
-    protected void validateDates(LocalDateTime start, LocalDateTime end) {
-        if (LocalDateTime.now().isAfter(start)) {
-            throw new DatesInconsistencyException("Start date cannot be in the past");
-        }
-        if (!start.isBefore(end)) {
-            throw new DatesInconsistencyException("Start date must be before end date");
-        }
     }
 }

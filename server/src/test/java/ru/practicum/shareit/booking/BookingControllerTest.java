@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
-import ru.practicum.shareit.exception.DatesInconsistencyException;
 import ru.practicum.shareit.exception.UnavailableItemException;
 import ru.practicum.shareit.exception.UnsupportedOperationException;
 import ru.practicum.shareit.fixtures.BookingFixture;
@@ -84,15 +83,6 @@ class BookingControllerTest {
         reset(bookingService);
         when(bookingService.create(any(), any(), any(), any()))
                 .thenThrow(UnavailableItemException.class);
-        mvc.perform(post("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "42")
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is4xxClientError());
-
-        reset(bookingService);
-        when(bookingService.create(any(), any(), any(), any()))
-                .thenThrow(DatesInconsistencyException.class);
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", "42")
